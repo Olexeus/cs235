@@ -35,7 +35,7 @@ namespace custom {
 	public:
 		class BNode;
 		BNode* root;
-		BNode** findLocation(T t);
+		BNode** findParent(T t);
 		int numElements;
 		void deleteNode(BNode* toDelete, bool right);
 		void deleteBinaryTree(BNode* toDelete);
@@ -59,10 +59,12 @@ namespace custom {
 		~BNode();
 
 		// other functions
-		bool isRed() { return this->color == RED; }
-		bool isBlack() { return this->color == BLACK; }
-		void addLeft(const BNode* pAdd);
-		void addRight(const BNode* pAdd);
+		bool isRed()		{ return this->color == RED; }
+		bool isBlack()		{ return this->color == BLACK; }
+		void setRed()		{ this->color = RED; }
+		void setBlack()	{ this->color = BLACK; }
+		void addLeft(BNode* pAdd);
+		void addRight(BNode* pAdd);
 
 	public:
 		void verifyRB(int depth);
@@ -78,7 +80,6 @@ namespace custom {
 
 	public:
 		BST<T>::BNode* ptr;
-		BST<T>::BNode** pDouble;
 
 	public:
 		//friend iterator BST<T>::insert(const T& t);
@@ -86,18 +87,11 @@ namespace custom {
 		// constructors
 		iterator() {
 			this->ptr = NULL;
-			this->pDouble = NULL;
 		}
 
 		iterator(BNode* ptr) {
 			this->ptr = ptr;
-			this->pDouble = NULL;
 		}
-
-		/*iterator(BNode** ptr) {
-			this->pDouble = ptr;
-			this->ptr = *ptr;
-		}*/
 
 		iterator(const iterator& it) {
 			this->ptr = it.ptr;
@@ -107,7 +101,7 @@ namespace custom {
 		T operator*()
 		{
 			if (this->ptr == NULL)
-				throw "Error: Dereferencing null node.";
+				throw "Error: dereferencing null node.";
 			return ptr->data;
 		}
 
@@ -120,7 +114,7 @@ namespace custom {
 		// Increments and decrements
 		iterator& operator++() {
 			if (this->ptr == NULL)
-				throw "Error: Incrementing null node.";
+				throw "Error: incrementing null node.";
 
 			BST<T>::BNode* pCurrent = this->ptr;
 
@@ -157,7 +151,7 @@ namespace custom {
 
 		iterator& operator--() {
 			if (this->ptr == NULL)
-				throw "Error: Decrementing null node.";
+				throw "Error: decrementing null node.";
 
 			BST<T>::BNode* pCurrent = this->ptr;
 
@@ -246,7 +240,7 @@ namespace custom {
 	{
 		BST<T>::BNode* pCurrent = this->root;
 
-		while (pCurrent->pLeft)
+		while (pCurrent != NULL && pCurrent->pLeft != NULL)
 		{
 			pCurrent = pCurrent->pLeft;
 		}
@@ -255,7 +249,13 @@ namespace custom {
 	template<class T>
 	inline typename BST<T>::iterator BST<T>::end() const
 	{
-		return NULL;
+		BST<T>::BNode* pCurrent = this->root;
+
+		while (pCurrent != NULL && pCurrent->pRight != NULL)
+		{
+			pCurrent = pCurrent->pRight;
+		}
+		return iterator(pCurrent);
 	}
 
 	
@@ -264,91 +264,257 @@ namespace custom {
 	template<class T>
 	inline typename BST<T>::iterator BST<T>::insert(const T& t)
 	{
-		BST<T>::BNode** pCurrent = &this->root;
+		// we need to change the value of treePointer to the node
+		// at the location at which this treePointer to the node is stored in the tree
+		// therefore, we store the pointer to the treePointer in the
+		// doublePointer and then we change the value of the treePointer to point to the new node
+		// by accessing from the doublePointer the location at which 
+		// treePointer is stored and changing its value
 
-		while (*pCurrent != NULL/* && (pCurrent->pRight || pCurrent->pLeft)*/)
+		// edit: we actually sent the doublePointer of parent of treePointer
+		// to be able to set the parent for the treePointer node
+
+		BST<T>::BNode** pTemporary = this->findParent(t);
+
+		// use *pTemporary != NULL && to check if root is NULL
+		if (*pTemporary != NULL && (*pTemporary)->data == t)
+		{ // return if element exists
+			return iterator(*pTemporary);
+		}
+
+		// if data smaller then node - go left
+		if (*pTemporary != NULL && t < (*pTemporary)->data)
 		{
-			// if data found break the loop
-			if ((*pCurrent)->data == t)
-			{
-				break;
-			}
+			(*pTemporary)->pLeft = new BST<T>::BNode(t);
+			(*pTemporary)->pLeft->pParent = (*pTemporary);
+			(pTemporary) = &(*pTemporary)->pLeft;
+		}
+		// if data bigger then node - go right
+		else if (*pTemporary != NULL && t > (*pTemporary)->data)
+		{
+			(*pTemporary)->pRight = new BST<T>::BNode(t);
+			(*pTemporary)->pRight->pParent = (*pTemporary);
+			(pTemporary) = &(*pTemporary)->pRight;
+		} 
+		// if root is NULL
+		else
+		{
+			(*pTemporary) = new BST<T>::BNode(t);
+		}
 
-			// if data smaller then node - go left
-			if (t < (*pCurrent)->data)
+		this->numElements++;
+		BST<T>::BNode* pNew				= *pTemporary;
+		BST<T>::BNode* pParent			= pNew->pParent;
+		BST<T>::BNode* pSiblingLeft	= NULL;
+		BST<T>::BNode* pSiblingRight	= NULL;
+		BST<T>::BNode* pGparent			= NULL;
+		BST<T>::BNode* pAuntLeft		= NULL;
+		BST<T>::BNode* pAuntRight		= NULL;
+		if (pParent != NULL)
+		{
+			pSiblingLeft = pNew->pParent->pLeft;
+			pSiblingRight = pNew->pParent->pLeft;
+			pGparent = pNew->pParent->pParent;
+			if (pGparent != NULL)
 			{
-				(pCurrent) = &(*pCurrent)->pLeft;
-			}
-			// if data bigger then node - go right
-			else if (t > (*pCurrent)->data)
-			{
-				(pCurrent) = &(*pCurrent)->pRight;
+				pAuntLeft = pNew->pParent->pParent->pLeft;
+				pAuntRight = pNew->pParent->pParent->pRight;
 			}
 		}
-		BST<T>::BNode* pNew = new BST<T>::BNode(t);
-		//*pCurrent = pNew;
-		pCurrent = this->findLocation(t);
-		*pCurrent = pNew;
 
 
-		// TODO
+		// No parent (1)
+		if (pParent == NULL)
+		{
+			pNew->setBlack();
+		}
+		// Parent is black (2)
+		else if (pParent->isBlack())
+		{
+			// Do nothing I guess
+		}
+		else if (pParent->isRed() && pGparent->isBlack()) // pGparent must exist if pParent is red
+		{
+			// Right Child
+			if (pSiblingRight == pNew)
+			{
+				if (pParent == pAuntRight)
+				{
+					// Parent and aunt are red (3)
+					if (pAuntLeft != NULL && pAuntLeft->isRed())
+					{
+						// Right child. Right Parent. Red Aunt
+						// recolor
+						// TODO
+					}
+					else if (pAuntLeft == NULL || pAuntLeft->isBlack())
+					{ // didn't count for black sibling. IDK whether i have to
+						// Right child. Right Parent. No Aunt
+						// Rotate left. (4b)
+						pParent->addLeft(pGparent);
+						pGparent->addRight(pSiblingLeft);
+						pParent->pParent = pGparent->pParent;
+						pGparent->pParent = pParent;
+
+						pParent->setBlack();
+						pGparent->setRed();
+					}
+				}
+				else if (pParent == pAuntLeft)
+				{
+					// Parent and aunt are red (3)
+					if (pAuntRight != NULL && pAuntRight->isRed())
+					{
+						// Right child. Left Parent. Red Aunt
+						// recolor
+						// TODO
+					}
+					else if (pAuntRight == NULL || pAuntRight->isBlack())
+					{
+						// Right child. Left Parent. No Aunt
+						// Swap. (4c)
+						pParent->addRight(pNew->pLeft);
+						pGparent->addLeft(pNew->pRight);
+
+						if (pGparent->pParent == NULL)
+						{
+							pNew->pParent = NULL;
+						}
+						else if (pGparent->pParent->pRight = pGparent)
+						{
+							pGparent->pParent->pRight = pNew;
+						}
+						else if (pGparent->pParent->pLeft = pGparent)
+						{
+							pGparent->pParent->pLeft = pNew;
+						}
+
+						pNew->addLeft(pParent);
+						pNew->addRight(pGparent);
+
+						pNew->setBlack();
+						pGparent->setRed();
+					}
+				}
+			}
+			// Left Child
+			else if (pSiblingLeft == pNew)
+			{
+				if (pParent == pAuntRight)
+				{
+					// Parent and aunt are red (3)
+					if (pAuntLeft != NULL && pAuntLeft->isRed())
+					{
+						// Left child. Right Parent. Red Aunt
+						// recolor
+						// TODO
+					}
+					else if (pAuntLeft == NULL || pAuntLeft->isBlack())
+					{ // didn't count for black sibling. IDK whether i have to
+						// Left child. Right Parent. No Aunt
+						// Rotate left. (4a)
+						pParent->addRight(pGparent);
+						pGparent->addLeft(pSiblingRight);
+						pParent->pParent = pGparent->pParent;
+						pGparent->pParent = pParent;
+
+						pParent->setBlack();
+						pGparent->setRed();
+					}
+				}
+				else if (pParent == pAuntLeft)
+				{
+					// Parent and aunt are red (3)
+					if (pAuntRight != NULL && pAuntRight->isRed())
+					{
+						// Left child. Left Parent. Red Aunt
+						// recolor
+						// TODO
+					}
+					else if (pAuntRight == NULL || pAuntRight->isBlack())
+					{
+						// Left child. Left Parent. No Aunt
+						// Swap. (4d)
+						pParent->addLeft(pNew->pRight);
+						pGparent->addRight(pNew->pLeft);
+
+						if (pGparent->pParent == NULL)
+						{
+							pNew->pParent = NULL;
+						}
+						else if (pGparent->pParent->pRight = pGparent)
+						{
+							pGparent->pParent->pRight = pNew;
+						}
+						else if (pGparent->pParent->pLeft = pGparent)
+						{
+							pGparent->pParent->pLeft = pNew;
+						}
+
+						pNew->addLeft(pGparent);
+						pNew->addRight(pParent);
+
+						pNew->setBlack();
+						pGparent->setRed();
+					}
+				}
+			}
+		}
+
 		return iterator();
 	}
 
 	template<class T>
 	inline typename BST<T>::iterator BST<T>::find(T t)
 	{
-		BST<T>::BNode** pCurrent = &this->root;
-		
-		while (*pCurrent != NULL/* && (pCurrent->pRight || pCurrent->pLeft)*/)
+		BST<T>::BNode** pCurrent = this->findParent(t);
+		// use *pCurrent != NULL to check when root is NULL
+		if (*pCurrent != NULL && (*pCurrent)->data != t)
 		{
-			// if data found break the loop
-			if ((*pCurrent)->data == t)
-			{
-				break;
-			}
-
 			// if data smaller then node - go left
 			if (t < (*pCurrent)->data)
 			{
 				(pCurrent) = &(*pCurrent)->pLeft;
-			} 
+			}
 			// if data bigger then node - go right
 			else if (t > (*pCurrent)->data)
 			{
 				(pCurrent) = &(*pCurrent)->pRight;
 			}
 		}
-		pCurrent = this->findLocation(t);
 		return iterator(*pCurrent);
 	}
 
 	template<class T>
-	inline typename BST<T>::BNode** BST<T>::findLocation(T t)
+	inline typename BST<T>::BNode** BST<T>::findParent(T t)
 	{
 		BST<T>::BNode** pCurrent = &this->root;
+		BST<T>::BNode** pPrev = pCurrent;
 
 		while (*pCurrent != NULL/* && (pCurrent->pRight || pCurrent->pLeft)*/)
 		{
 			// if data found break the loop
 			if ((*pCurrent)->data == t)
 			{
+				pPrev = pCurrent;
 				break;
 			}
 
 			// if data smaller then node - go left
 			if (t < (*pCurrent)->data)
 			{
+				pPrev = pCurrent;
 				(pCurrent) = &(*pCurrent)->pLeft;
 			}
 			// if data bigger then node - go right
 			else if (t > (*pCurrent)->data)
 			{
+				pPrev = pCurrent;
 				(pCurrent) = &(*pCurrent)->pRight;
 			}
 		}
 
-		return (pCurrent);
+		return (pPrev);
 	}
 
 	template<class T>
@@ -493,21 +659,21 @@ namespace custom {
 	}
 
 	template<class T>
-	inline void BST<T>::BNode::addLeft(const BST<T>::BNode* pAdd)
+	inline void BST<T>::BNode::addLeft(BST<T>::BNode* pAdd)
 	{
 		if (pAdd != NULL)
 		{
-			pAdd->pParrent = this;
+			pAdd->pParent = this;
 		}
 		this->pLeft = pAdd;
 	}
 
 	template<class T>
-	inline void BST<T>::BNode::addRight(const BST<T>::BNode* pAdd)
+	inline void BST<T>::BNode::addRight(BST<T>::BNode* pAdd)
 	{
 		if (pAdd != NULL)
 		{
-			pAdd->pParrent = this;
+			pAdd->pParent = this;
 		}
 		this->pRight = pAdd;
 	}
