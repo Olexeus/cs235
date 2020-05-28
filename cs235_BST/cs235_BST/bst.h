@@ -35,10 +35,39 @@ namespace custom {
 	public:
 		class BNode;
 		BNode* root;
+		BNode** findLocation(T t);
 		int numElements;
 		void deleteNode(BNode* toDelete, bool right);
 		void deleteBinaryTree(BNode* toDelete);
-		void copyBinaryTree(BNode* src, BNode* dest);
+		void copyBinaryTree(const BNode* src, BNode*& dest) const;
+	};
+
+
+
+	template <class T>
+	class BST<T>::BNode
+	{
+	public:
+		T data;
+		BNode* pLeft;
+		BNode* pRight;
+		BNode* pParent;
+		bool color;
+
+		BNode();
+		BNode(T t);
+		~BNode();
+
+		// other functions
+		bool isRed() { return this->color == RED; }
+		bool isBlack() { return this->color == BLACK; }
+		void addLeft(const BNode* pAdd);
+		void addRight(const BNode* pAdd);
+
+	public:
+		void verifyRB(int depth);
+		void verifyBST();
+		void balance();
 	};
 
 
@@ -49,6 +78,7 @@ namespace custom {
 
 	public:
 		BST<T>::BNode* ptr;
+		BST<T>::BNode** pDouble;
 
 	public:
 		//friend iterator BST<T>::insert(const T& t);
@@ -56,11 +86,18 @@ namespace custom {
 		// constructors
 		iterator() {
 			this->ptr = NULL;
+			this->pDouble = NULL;
 		}
 
 		iterator(BNode* ptr) {
 			this->ptr = ptr;
+			this->pDouble = NULL;
 		}
+
+		/*iterator(BNode** ptr) {
+			this->pDouble = ptr;
+			this->ptr = *ptr;
+		}*/
 
 		iterator(const iterator& it) {
 			this->ptr = it.ptr;
@@ -84,7 +121,31 @@ namespace custom {
 		iterator& operator++() {
 			if (this->ptr == NULL)
 				throw "Error: Incrementing null node.";
-			//(this->ptr->pNext != NULL) ? this->ptr = this->ptr->pNext : this->ptr;
+
+			BST<T>::BNode* pCurrent = this->ptr;
+
+			if (pCurrent->pRight)
+			{
+				pCurrent = pCurrent->pRight;
+				while (pCurrent->pLeft)
+				{
+					pCurrent = pCurrent->pLeft;
+				}
+			}
+			else if (pCurrent->pRight == NULL && pCurrent->pParent->pLeft == pCurrent)
+			{
+				pCurrent = pCurrent->pParent;
+			}
+			else if (pCurrent->pRight == NULL && pCurrent->pParent->pRight == pCurrent)
+			{
+				while (pCurrent->pParent && pCurrent->pParent->pRight == pCurrent)
+				{
+					pCurrent = pCurrent->pParent;
+				}
+				pCurrent = pCurrent->pParent;
+			}
+
+			this->ptr = pCurrent;
 			return *this;
 		}
 
@@ -97,7 +158,31 @@ namespace custom {
 		iterator& operator--() {
 			if (this->ptr == NULL)
 				throw "Error: Decrementing null node.";
-			//(this->ptr->pPrev != NULL) ? this->ptr = this->ptr->pPrev : this->ptr;
+
+			BST<T>::BNode* pCurrent = this->ptr;
+
+			if (pCurrent->pLeft)
+			{
+				pCurrent = pCurrent->pLeft;
+				while (pCurrent->pRight)
+				{
+					pCurrent = pCurrent->pRight;
+				}
+			}
+			else if (pCurrent->pLeft == NULL && pCurrent->pParent->pRight == pCurrent)
+			{
+				pCurrent = pCurrent->pParent;
+			}
+			else if (pCurrent->pLeft == NULL && pCurrent->pParent->pLeft == pCurrent)
+			{
+				while (pCurrent->pParent && pCurrent->pParent->pLeft == pCurrent)
+				{
+					pCurrent = pCurrent->pParent;
+				}
+				pCurrent = pCurrent->pParent;
+			}
+
+			this->ptr = pCurrent;
 			return *this;
 		}
 
@@ -119,28 +204,6 @@ namespace custom {
 
 
 
-	template <class T>
-	class BST<T>::BNode
-	{
-	public:
-		T data;
-		BNode* pLeft;
-		BNode* pRight;
-		BNode* pParent;
-		bool color;
-
-		BNode();
-		BNode(T t);
-		~BNode();
-
-	public:
-		void verifyRB(int depth);
-		void verifyBST();
-		void balance();
-	};
-
-
-
 	// constructors and destructors
 	template<class T>
 	inline BST<T>::BST()
@@ -152,13 +215,13 @@ namespace custom {
 	template<class T>
 	inline BST<T>::BST(const BST<T>& rhs)
 	{
-		// TODO
+		*this = rhs;
 	}
 
 	template<class T>
 	inline BST<T>::~BST()
 	{
-		// TODO
+		this->clear();
 	}
 
 
@@ -172,7 +235,7 @@ namespace custom {
 	template<class T>
 	inline bool BST<T>::empty() const
 	{
-		return this->root == NULL;
+		return this->numElements == 0;
 	}
 
 
@@ -181,14 +244,18 @@ namespace custom {
 	template<class T>
 	inline typename BST<T>::iterator BST<T>::begin() const
 	{
-		// TODO
-		return iterator();
+		BST<T>::BNode* pCurrent = this->root;
+
+		while (pCurrent->pLeft)
+		{
+			pCurrent = pCurrent->pLeft;
+		}
+		return iterator(pCurrent);
 	}
 	template<class T>
 	inline typename BST<T>::iterator BST<T>::end() const
 	{
-		// TODO
-		return iterator();
+		return NULL;
 	}
 
 	
@@ -197,6 +264,33 @@ namespace custom {
 	template<class T>
 	inline typename BST<T>::iterator BST<T>::insert(const T& t)
 	{
+		BST<T>::BNode** pCurrent = &this->root;
+
+		while (*pCurrent != NULL/* && (pCurrent->pRight || pCurrent->pLeft)*/)
+		{
+			// if data found break the loop
+			if ((*pCurrent)->data == t)
+			{
+				break;
+			}
+
+			// if data smaller then node - go left
+			if (t < (*pCurrent)->data)
+			{
+				(pCurrent) = &(*pCurrent)->pLeft;
+			}
+			// if data bigger then node - go right
+			else if (t > (*pCurrent)->data)
+			{
+				(pCurrent) = &(*pCurrent)->pRight;
+			}
+		}
+		BST<T>::BNode* pNew = new BST<T>::BNode(t);
+		//*pCurrent = pNew;
+		pCurrent = this->findLocation(t);
+		*pCurrent = pNew;
+
+
 		// TODO
 		return iterator();
 	}
@@ -204,21 +298,94 @@ namespace custom {
 	template<class T>
 	inline typename BST<T>::iterator BST<T>::find(T t)
 	{
-		// TODO
-		return iterator();
+		BST<T>::BNode** pCurrent = &this->root;
+		
+		while (*pCurrent != NULL/* && (pCurrent->pRight || pCurrent->pLeft)*/)
+		{
+			// if data found break the loop
+			if ((*pCurrent)->data == t)
+			{
+				break;
+			}
+
+			// if data smaller then node - go left
+			if (t < (*pCurrent)->data)
+			{
+				(pCurrent) = &(*pCurrent)->pLeft;
+			} 
+			// if data bigger then node - go right
+			else if (t > (*pCurrent)->data)
+			{
+				(pCurrent) = &(*pCurrent)->pRight;
+			}
+		}
+		pCurrent = this->findLocation(t);
+		return iterator(*pCurrent);
+	}
+
+	template<class T>
+	inline typename BST<T>::BNode** BST<T>::findLocation(T t)
+	{
+		BST<T>::BNode** pCurrent = &this->root;
+
+		while (*pCurrent != NULL/* && (pCurrent->pRight || pCurrent->pLeft)*/)
+		{
+			// if data found break the loop
+			if ((*pCurrent)->data == t)
+			{
+				break;
+			}
+
+			// if data smaller then node - go left
+			if (t < (*pCurrent)->data)
+			{
+				(pCurrent) = &(*pCurrent)->pLeft;
+			}
+			// if data bigger then node - go right
+			else if (t > (*pCurrent)->data)
+			{
+				(pCurrent) = &(*pCurrent)->pRight;
+			}
+		}
+
+		return (pCurrent);
 	}
 
 	template<class T>
 	inline BST<T>& BST<T>::operator=(const BST<T>& rhs)
 	{
-		// TODO
+		if (rhs.root == NULL)
+		{
+			return *this;
+		}
+
+		this->clear();
+
+		copyBinaryTree(rhs.root, this->root);
+
+		this->numElements = rhs.numElements;
 		return *this;
 	}
 
 	template<class T>
-	inline void BST<T>::copyBinaryTree(BNode* src, BNode* dest)
+	inline void BST<T>::copyBinaryTree(const BNode* src, BNode*& dest) const
 	{
-		// TODO
+		if (src == NULL)
+			return;
+
+		dest = new BST<T>::BNode(src->data);
+
+		this->copyBinaryTree(src->pLeft, dest->pLeft);
+		if (dest->pLeft != NULL)
+		{
+			dest->pLeft->pParent = dest;
+		}
+
+		this->copyBinaryTree(src->pRight, dest->pRight);
+		if (dest->pRight != NULL)
+		{
+			dest->pRight->pParent = dest;
+		}
 	}
 
 
@@ -227,7 +394,7 @@ namespace custom {
 	template<class T>
 	inline void BST<T>::clear()
 	{
-		// TODO
+		deleteBinaryTree(this->root);
 	}
 
 	template<class T>
@@ -239,7 +406,13 @@ namespace custom {
 	template<class T>
 	inline void BST<T>::deleteBinaryTree(BNode* toDelete)
 	{
-		// TODO
+		if (toDelete == NULL)
+			return;
+
+		this->deleteBinaryTree(toDelete->pLeft);
+		this->deleteBinaryTree(toDelete->pRight);
+
+		delete (toDelete);
 	}
 
 	template<class T>
@@ -255,19 +428,49 @@ namespace custom {
 	template<class T>
 	inline BST<T>::BNode::BNode()
 	{
-		// TODO
+		data = T();			
+		pLeft = NULL;		
+		pRight = NULL;				
+		pParent = NULL;				
+		color = RED;
 	}
 
 	template<class T>
 	inline BST<T>::BNode::BNode(T t)
 	{
-		// TODO
+		data = t;
+		pLeft = NULL;
+		pRight = NULL;
+		pParent = NULL;
+		color = RED;
 	}
 
 	template<class T>
 	inline BST<T>::BNode::~BNode()
 	{
-		// TODO
+		if (pLeft != NULL)
+		{
+			delete pLeft;
+			pLeft = NULL;
+		}
+		if (pRight != NULL)
+		{
+			delete pRight;
+			pRight = NULL;
+		}
+		if (pParent != NULL)
+		{
+			if (pParent->pLeft == this)
+			{
+				pParent->pLeft = NULL;
+				pParent = NULL;
+			}
+			else if (pParent->pRight == this)
+			{
+				pParent->pRight = NULL;
+				pParent = NULL;
+			}
+		}
 	}
 
 	// BNode special functions
@@ -287,6 +490,26 @@ namespace custom {
 	inline void BST<T>::BNode::balance()
 	{
 		// TODO
+	}
+
+	template<class T>
+	inline void BST<T>::BNode::addLeft(const BST<T>::BNode* pAdd)
+	{
+		if (pAdd != NULL)
+		{
+			pAdd->pParrent = this;
+		}
+		this->pLeft = pAdd;
+	}
+
+	template<class T>
+	inline void BST<T>::BNode::addRight(const BST<T>::BNode* pAdd)
+	{
+		if (pAdd != NULL)
+		{
+			pAdd->pParrent = this;
+		}
+		this->pRight = pAdd;
 	}
 }
 
