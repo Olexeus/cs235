@@ -1,0 +1,14 @@
+﻿  main.cpp
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\unit_testing.h(89,54): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\unit_testing.h(90,1): warning C5043: 'operator new': exception specification does not match previous declaration
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\predefined C++ types (compiler internal)(33): message : see declaration of 'operator new'
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\main.cpp(95,23): warning C4018: '<': signed/unsigned mismatch
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\main.cpp(320,23): warning C4018: '<': signed/unsigned mismatch
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\queue.h(112,30): warning C4018: '<': signed/unsigned mismatch
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\queue.h(107): message : while compiling class template member function 'custom::queue<int> &custom::queue<int>::operator =(const custom::queue<int> &)'
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\main.cpp(324): message : see reference to function template instantiation 'custom::queue<int> &custom::queue<int>::operator =(const custom::queue<int> &)' being compiled
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\main.cpp(50): message : see reference to class template instantiation 'custom::queue<int>' being compiled
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\queue.h(140,34): warning C4018: '<': signed/unsigned mismatch
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\queue.h(122): message : while compiling class template member function 'void custom::queue<int>::resize(int)'
+D:\Lut\School\BUYI\CS 235\cs235_queue\cs235_queue\main.cpp(125): message : see reference to function template instantiation 'void custom::queue<int>::resize(int)' being compiled
+  cs235_queue.vcxproj -> D:\Lut\School\BUYI\CS 235\cs235_queue\Debug\cs235_queue.exe

@@ -1,0 +1,8 @@
+﻿  main.cpp
+D:\Lut\School\BUYI\CS 235\cs235_list\cs235_list\unit_testing.h(89,54): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+D:\Lut\School\BUYI\CS 235\cs235_list\cs235_list\unit_testing.h(90,1): warning C5043: 'operator new': exception specification does not match previous declaration
+D:\Lut\School\BUYI\CS 235\cs235_list\cs235_list\predefined C++ types (compiler internal)(33): message : see declaration of 'operator new'
+D:\Lut\School\BUYI\CS 235\cs235_list\cs235_list\main.cpp(415,26): warning C4101: 'message': unreferenced local variable
+D:\Lut\School\BUYI\CS 235\cs235_list\cs235_list\main.cpp(440,26): warning C4101: 'message': unreferenced local variable
+D:\Lut\School\BUYI\CS 235\cs235_list\cs235_list\main.cpp(487,26): warning C4101: 'message': unreferenced local variable
+  cs235_list.vcxproj -> D:\Lut\School\BUYI\CS 235\cs235_list\Debug\cs235_list.exe

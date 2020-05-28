@@ -1,0 +1,25 @@
+﻿  main.cpp
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\unit_testing.h(89,54): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\unit_testing.h(90,1): warning C5043: 'operator new': exception specification does not match previous declaration
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\predefined C++ types (compiler internal)(33): message : see declaration of 'operator new'
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\main.cpp(109,23): warning C4018: '<': signed/unsigned mismatch
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\main.cpp(885,23): warning C4018: '<': signed/unsigned mismatch
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(58,50): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(58): message : while compiling class template member function 'int custom::deque<int>::iBackNormalize(void)'
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\main.cpp(215): message : see reference to function template instantiation 'int custom::deque<int>::iBackNormalize(void)' being compiled
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\main.cpp(50): message : see reference to class template instantiation 'custom::deque<int>' being compiled
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(57,51): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(57): message : while compiling class template member function 'int custom::deque<int>::iFrontNormalize(void)'
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\main.cpp(183): message : see reference to function template instantiation 'int custom::deque<int>::iFrontNormalize(void)' being compiled
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(29,57): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(29): message : while compiling class template member function 'int custom::deque<int>::size(void) const'
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\main.cpp(81): message : see reference to function template instantiation 'int custom::deque<int>::size(void) const' being compiled
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(183,32): warning C4018: '>': signed/unsigned mismatch
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(164): message : while compiling class template member function 'void custom::deque<int>::resize(unsigned int)'
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\main.cpp(242): message : see reference to function template instantiation 'void custom::deque<int>::resize(unsigned int)' being compiled
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(154,14): warning C4244: 'initializing': conversion from 'const __int64' to 'int', possible loss of data
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(147): message : while compiling class template member function 'custom::deque<int> &custom::deque<int>::operator =(const custom::deque<int> &)'
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(94): message : see reference to function template instantiation 'custom::deque<int> &custom::deque<int>::operator =(const custom::deque<int> &)' being compiled
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\deque.h(93): message : while compiling class template member function 'custom::deque<int>::deque(custom::deque<int> &)'
+D:\Lut\School\BUYI\CS 235\cs235_dequeue\cs235_dequeue\main.cpp(772): message : see reference to function template instantiation 'custom::deque<int>::deque(custom::deque<int> &)' being compiled
+  cs235_dequeue.vcxproj -> D:\Lut\School\BUYI\CS 235\cs235_dequeue\Debug\cs235_dequeue.exe
