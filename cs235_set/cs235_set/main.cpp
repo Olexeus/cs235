@@ -587,7 +587,7 @@ int main(int argc, const char* argv[])
     otherPartialSet.buffer[2] = 78;
     otherPartialSet.buffer[3] = 789;
     
-    // changed this to difference operator
+    // changed this to intersection operator
     assertTrue((partialSet && otherPartialSet).buffer != NULL, __LINE__);
     assertTrue((partialSet && otherPartialSet).buffer != shortSet.buffer, __LINE__);
     assertTrue((partialSet && otherPartialSet).buffer != longSet.buffer, __LINE__);

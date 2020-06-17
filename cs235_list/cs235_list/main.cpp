@@ -31,7 +31,7 @@
 #define UNIT_TESTING
 //Do not change the next line without instructor approval.
 //To do so is cheating and, when found, will result in consequences.
-int asserts_existing = 353;
+int asserts_existing = 332;
 
 #include <cstring>
 #include "unit_testing.h"

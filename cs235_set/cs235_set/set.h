@@ -1,6 +1,8 @@
 #ifndef SET_H
 #define SET_H
 
+int main(int argc, const char* argv[]);
+
 namespace custom {
 	template <class T>
 	class set
@@ -226,9 +228,9 @@ namespace custom {
 			else
 			{
 				iBegin = iMiddle + 1;
-				// if needs to be inserted before the element
-				// iMiddle--;
 			}
+			// It returns the next element when the number of elements is either odd or even
+			// this part is a bit clumsy, but I do not know how to make it better
 			iMiddle = (iBegin + iEnd + 1) / 2;
 		}
 		return iMiddle;

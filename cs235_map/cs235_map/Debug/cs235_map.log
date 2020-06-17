@@ -1,0 +1,5 @@
+﻿  main.cpp
+D:\Lut\School\BUYI\CS 235\cs235_map\cs235_map\unit_testing.h(89,54): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+D:\Lut\School\BUYI\CS 235\cs235_map\cs235_map\unit_testing.h(90,1): warning C5043: 'operator new': exception specification does not match previous declaration
+D:\Lut\School\BUYI\CS 235\cs235_map\cs235_map\predefined C++ types (compiler internal)(33): message : see declaration of 'operator new'
+  cs235_map.vcxproj -> D:\Lut\School\BUYI\CS 235\cs235_map\Debug\cs235_map.exe

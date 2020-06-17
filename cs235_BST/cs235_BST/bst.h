@@ -1,6 +1,8 @@
 #ifndef BST_H
 #define BST_H
 
+int main(int argc, const char* argv[]);
+
 namespace custom {
 	enum Color { RED, BLACK };
 
@@ -9,7 +11,7 @@ namespace custom {
 	{
 	public:
 		#ifdef UNIT_TESTING
-			//friend int ::main(int argc, const char* argv[]);
+			friend int ::main(int argc, const char* argv[]);
 		#endif // UNIT_TESTING
 
 		// constructors and destructors
@@ -27,18 +29,21 @@ namespace custom {
 		iterator begin() const;
 		iterator end() const;
 
+
 		// special functions
 		iterator insert(const T& t);
 		iterator find(T t);
-		iterator erase(iterator it);
+		void erase(iterator it);
 		BST<T>& operator=(const BST<T>& rhs);
 	public:
 		class BNode;
+		BNode* maxNode(BNode* pSrc) const;
+		BNode* minNode(BNode* pSrc) const;
 		BNode* root;
 		BNode** findParent(T t);
 		int numElements;
 		void deleteNode(BNode* toDelete, bool right);
-		void deleteBinaryTree(BNode* toDelete);
+		void deleteBinaryTree(BNode*& toDelete);
 		void copyBinaryTree(const BNode* src, BNode*& dest) const;
 	};
 
@@ -238,24 +243,47 @@ namespace custom {
 	template<class T>
 	inline typename BST<T>::iterator BST<T>::begin() const
 	{
-		BST<T>::BNode* pCurrent = this->root;
-
-		while (pCurrent != NULL && pCurrent->pLeft != NULL)
-		{
-			pCurrent = pCurrent->pLeft;
-		}
-		return iterator(pCurrent);
+		return iterator(this->minNode(this->root));
 	}
 	template<class T>
 	inline typename BST<T>::iterator BST<T>::end() const
 	{
-		BST<T>::BNode* pCurrent = this->root;
+		return iterator(this->maxNode(this->root));
+	}
+	/**
+ * Recursively traverse the left side of the tree to find
+ * the minimum valued node.
+ */
+	template <class T>
+	typename BST<T>::BNode* BST<T>::minNode(BNode* pSrc) const
+	{
+		/*BST<T>::BNode* pCurrent = this->root;
+
+		while (pCurrent != NULL && pCurrent->pLeft != NULL)
+		{
+			pCurrent = pCurrent->pLeft;
+		}*/
+		if (pSrc == NULL || pSrc->pLeft == NULL)
+			return pSrc;
+		return minNode(pSrc->pLeft);
+	}
+
+	/**
+	 * Recursively traverse the right side of the tree to find
+	 * the maximum valued node.
+	 */
+	template <class T>
+	typename BST<T>::BNode* BST<T>::maxNode(BNode* pSrc) const
+	{
+		/*BST<T>::BNode* pCurrent = this->root;
 
 		while (pCurrent != NULL && pCurrent->pRight != NULL)
 		{
 			pCurrent = pCurrent->pRight;
-		}
-		return iterator(pCurrent);
+		}*/
+		if (pSrc == NULL || pSrc->pRight == NULL)
+			return pSrc;
+		return maxNode(pSrc->pRight);
 	}
 
 	
@@ -570,7 +598,7 @@ namespace custom {
 	}
 
 	template<class T>
-	inline void BST<T>::deleteBinaryTree(BNode* toDelete)
+	inline void BST<T>::deleteBinaryTree(BNode*& toDelete)
 	{
 		if (toDelete == NULL)
 			return;
@@ -578,14 +606,97 @@ namespace custom {
 		this->deleteBinaryTree(toDelete->pLeft);
 		this->deleteBinaryTree(toDelete->pRight);
 
-		delete (toDelete);
+		delete toDelete; // V
+		toDelete = NULL;
+		this->numElements--;
 	}
 
 	template<class T>
-	inline typename BST<T>::iterator BST<T>::erase(iterator it)
+	inline void BST<T>::erase(iterator it)
 	{
-		// TODO
-		return iterator();
+		BNode* pSrc = it.ptr;
+
+		// case 1: has no children
+		if (pSrc->pLeft == NULL && pSrc->pRight == NULL)
+		{
+			if (pSrc->pParent != NULL)
+			{
+				if (pSrc->pParent->pRight == pSrc)
+					pSrc->pParent->pRight = NULL;
+				else if (pSrc->pParent->pLeft == pSrc)
+					pSrc->pParent->pLeft = NULL;
+			}
+
+			delete pSrc;
+			pSrc = NULL;
+			numElements--;
+		}
+		// case 2: has left child only
+		else if (pSrc->pRight == NULL)
+		{
+			pSrc->pLeft->pParent = pSrc->pParent;
+			if (pSrc->pParent != NULL)
+			{
+				if (pSrc->pParent->pRight == pSrc)
+					pSrc->pParent->pRight = pSrc->pLeft;
+				else
+					pSrc->pParent->pLeft = pSrc->pLeft;
+			}
+
+			delete pSrc;
+			pSrc = NULL;
+			numElements--;
+		}
+		// case 3: has right child only
+		else if (pSrc->pLeft == NULL)
+		{
+			pSrc->pRight->pParent = pSrc->pParent;
+			if (pSrc->pParent != NULL)
+			{
+				if (pSrc->pParent->pRight == pSrc)
+					pSrc->pParent->pRight = pSrc->pRight;
+				else
+					pSrc->pParent->pLeft = pSrc->pRight;
+			}
+
+			delete pSrc;
+			pSrc = NULL;
+			numElements--;
+		}
+		// case 4: has left and right children
+		else
+		{
+			BNode* pSuccessor = minNode(pSrc->pRight);
+
+			// strip successor out of sub-tree
+			if (pSuccessor->pRight)
+				pSuccessor->pRight->pParent = pSuccessor->pParent;
+			pSuccessor->pParent->pLeft = pSuccessor->pRight;
+
+			// connect target's parent to successor
+			pSuccessor->pParent = pSrc->pParent;
+			if (pSrc->pParent != NULL)
+			{
+				if (pSrc->pParent->pRight == pSrc)
+					pSrc->pParent->pRight = pSuccessor;
+				else
+					pSrc->pParent->pLeft = pSuccessor;
+			}
+
+			// connect target's children to successor
+			pSuccessor->pLeft = pSrc->pLeft;
+			pSuccessor->pRight = pSrc->pRight;
+			pSrc->pLeft->pParent = pSuccessor;
+			pSrc->pRight->pParent = pSuccessor;
+
+			// if successor is root update BST
+			if (!pSuccessor->pParent)
+				root = pSuccessor;
+
+			delete pSrc;
+			numElements--;
+		}
+
 	}
 
 
@@ -614,7 +725,7 @@ namespace custom {
 	template<class T>
 	inline BST<T>::BNode::~BNode()
 	{
-		if (pLeft != NULL)
+		/*if (pLeft != NULL)
 		{
 			delete pLeft;
 			pLeft = NULL;
@@ -636,7 +747,7 @@ namespace custom {
 				pParent->pRight = NULL;
 				pParent = NULL;
 			}
-		}
+		}*/
 	}
 
 	// BNode special functions
